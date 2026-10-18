@@ -35,7 +35,7 @@ func (r *ExpenseRepository) GetAll() ([]models.Expense, error) {
 	return list, nil
 }
 
-// Инсертим новую строчку в базу
+
 func (r *ExpenseRepository) Create(amount float64, desc string, date string) error {
 	// 
 	_, err := r.db.Exec("INSERT INTO expenses (amount, description, date) VALUES (?, ?, ?)", amount, desc, date)

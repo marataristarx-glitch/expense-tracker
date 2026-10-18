@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	// Подключаем локальную базу sqlite. Файл expenses.db сам создастся в корне проекта
+	
 	db, err := sql.Open("sqlite", "expenses.db")
 	if err != nil {
 		fmt.Printf("Не удалось открыть базу данных: %v\n", err)
@@ -23,7 +23,7 @@ func main() {
 	defer db.Close()
 
 	// Сюда запихал создание таблицы, чтобы она сама создавалась при запуске, если пропала.
-	//  работает нормально
+	//  работает xtnrf
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS expenses (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		amount REAL,
@@ -35,23 +35,23 @@ func main() {
 		return
 	}
 
-	// Читаем все html файлы из папки шаблонов web  /templates
+	// Читаем все html файлы из папки шаблонов web  
 	tpl := template.Must(template.ParseGlob("web/templates/*.html"))
 
-	// Инициализируем наш репозиторий с базой данных
+	
 	repo := repository.NewExpenseRepository(db)
 	
-	//  передаем  базу и шаблоны в хенгдлер
+	
 	h := handlers.NewExpenseHandler(repo, tpl)
 
 	// Он принимает запросы от браузера и решает, на какую страницу их отправить.
 	mux := http.NewServeMux()
 
 	// Этап 3: Главная страница сайта (переходим на http://localhost:8080)
-	// Теперь она завязана на структуру хендлера и берет данные из SQLite
+	
 	mux.HandleFunc("/", h.HandleIndex)         
 
-	// Хендлер для удаления траты по кнопке
+	// кнопка удаления
 	mux.HandleFunc("/delete", h.HandleDelete)
 
 	fmt.Println("Сервер Этапа 3 (с SQLite) запущен на http://localhost:8080")

@@ -16,7 +16,7 @@ func NewExpenseHandler(repo *repository.ExpenseRepository, tpl *template.Templat
 	return &ExpenseHandler{Repo: repo, Tpl: tpl}
 }
 
-// Один главный хендлер для главной страницы
+
 func (h *ExpenseHandler) HandleIndex(w http.ResponseWriter, r *http.Request) {
 	// Если юзер просто зашел на сайт (GET запрос)
 	if r.Method == "GET" {
@@ -25,12 +25,12 @@ func (h *ExpenseHandler) HandleIndex(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Ошибка базы данных", http.StatusInternalServerError)
 			return
 		}
-		// Отдаем html страницу и список трат
+		
 		h.Tpl.ExecuteTemplate(w, "layout.html", list)
 		return
 	}
 
-	// Если юзер отправил форму добавления (POST запрос)
+	
 	if r.Method == "POST" {
 		amountStr := r.FormValue("amount")
 		desc := r.FormValue("description")
