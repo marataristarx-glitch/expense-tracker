@@ -20,8 +20,20 @@ func main() {
 	}
 	defer db.Close()
 
-	// Создаём таблицу категорий, добавляем базовые категории и создаём таблицу расходов с внешним ключом
 	_, err = db.Exec(`
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		email TEXT NOT NULL UNIQUE,
+		password_hash TEXT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS sessions (
+		session_id TEXT PRIMARY KEY,
+		user_id INTEGER NOT NULL,
+		expires_at TEXT NOT NULL,
+		FOREIGN KEY (user_id) REFERENCES users(id)
+	);
+
 	CREATE TABLE IF NOT EXISTS categories (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL UNIQUE
@@ -36,10 +48,12 @@ func main() {
 
 	CREATE TABLE IF NOT EXISTS expenses (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
 		amount REAL,
 		description TEXT,
 		date TEXT,
 		category_id INTEGER,
+		FOREIGN KEY (user_id) REFERENCES users(id),
 		FOREIGN KEY (category_id) REFERENCES categories(id)
 	);`)
 	if err != nil {
@@ -53,10 +67,17 @@ func main() {
 	h := handlers.NewExpenseHandler(repo, tpl)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", h.HandleIndex)
-	mux.HandleFunc("/delete", h.HandleDelete)
 
-	fmt.Println("Сервер Этапа 4 (категории и фильтрация) запущен на http://localhost:8080")
+	// Открытые маршруты (доступны без входа)
+	mux.HandleFunc("/register", h.HandleRegister)
+	mux.HandleFunc("/login", h.HandleLogin)
+	mux.HandleFunc("/logout", h.HandleLogout)
+
+	// Защищённые маршруты (требуют авторизации через middleware)
+	mux.HandleFunc("/", h.AuthMiddleware(h.HandleIndex))
+	mux.HandleFunc("/delete", h.AuthMiddleware(h.HandleDelete))
+
+	fmt.Println("Сервер Этапа 5 (авторизация и сессии) запущен на http://localhost:8080")
 
 	err = http.ListenAndServe(":8080", mux)
 	if err != nil {
